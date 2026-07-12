@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio da Felicidade</title>
+    <!-- Google Fonts para um visual moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome para ícones elegantes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-hover: #5b4cdb;
+            --accent: #00cec9;
+            --accent-hover: #00b894;
+            --danger: #ff7675;
+            --danger-hover: #d63031;
+            --bg: #f5f6fa;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f6fa 0%, #dfe4ea 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Área de Destaque */
+        .display-panel {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 2px dashed #dfe6e9;
+            transition: all 0.3s ease;
+        }
+
+        .display-panel.winner-active {
+            border-color: var(--accent);
+            background: #e8fcfb;
+            animation: pulse 1.5s infinite;
+        }
+
+        .display-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .display-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .winner-active .display-number {
+            color: #00b894;
+        }
+
+        /* Botões de Controle */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            border: none;
+            padding: 15px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-generate {
+            background: var(--primary);
+            color: white;
+            grid-column: span 2;
+            font-size: 1.1rem;
+            padding: 18px;
+            box-shadow: 0 8px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-generate:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-draw {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 8px 15px rgba(0, 206, 201, 0.2);
+        }
+
+        .btn-draw:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-reset {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 8px 15px rgba(255, 118, 117, 0.2);
+        }
+
+        .btn-reset:hover {
+            background: var(--danger-hover);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Lista de Cadastrados */
+        .list-section {
+            margin-top: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .counter-badge {
+            background: #e0e0e0;
+            color: var(--text);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .numbers-list {
+            max-height: 220px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .number-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .number-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .number-val {
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn {
+            background: transparent;
+            color: var(--primary);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Toast de notificação */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2d3436;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Animações */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 206, 201, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(0, 206, 201, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 206, 201, 0); }
+        }
+
+        /* Custom Scrollbar */
+        .numbers-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .numbers-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .numbers-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        .numbers-list::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Sorteio da Felicidade</h1>
+            <p class="subtitle">Gere os números sequencialmente e faça seu sorteio</p>
+        </header>
+
+        <!-- Painel Central de Informações -->
+        <div class="display-panel" id="displayPanel">
+            <div class="display-title" id="panelTitle">Último Número Gerado</div>
+            <div class="display-number" id="panelValue">------</div>
+        </div>
+
+        <!-- Botões Principais -->
+        <div class="actions-grid">
+            <button class="btn-generate" id="btnGenerate" onclick="generateNextNumber()">
+                <i class="fa-solid fa-plus"></i> Gerar Próximo Número
+            </button>
+            <button class="btn-draw" id="btnDraw" onclick="drawWinner()" disabled>
+                <i class="fa-solid fa-trophy"></i> Sortear
+            </button>
+            <button class="btn-reset" onclick="resetApp()">
+                <i class="fa-solid fa-rotate-left"></i> Reiniciar
+            </button>
+        </div>
+
+        <!-- Lista de Participantes Ativos -->
+        <div class="list-section">
+            <div class="section-header">
+                <span>Participantes no Sorteio</span>
+                <span class="counter-badge" id="counterBadge">0 Gerados</span>
+            </div>
+            <div class="numbers-list" id="numbersList">
+                <!-- Números adicionados dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div class="toast" id="toast">Copiado com sucesso!</div>
+
+    <script>
+        let currentCount = 0;
+        const maxLimit = 200000;
+        const generatedNumbers = [];
+
+        const panelTitle = document.getElementById('panelTitle');
+        const panelValue = document.getElementById('panelValue');
+        const displayPanel = document.getElementById('displayPanel');
+        const btnGenerate = document.getElementById('btnGenerate');
+        const btnDraw = document.getElementById('btnDraw');
+        const counterBadge = document.getElementById('counterBadge');
+        const numbersList = document.getElementById('numbersList');
+        const toast = document.getElementById('toast');
+
+        // Formata o número com 6 dígitos (ex: 000001) para manter o layout limpo até 200k
+        function formatNumber(num) {
+            return String(num).padStart(6, '0');
+        }
+
+        // Mostra o aviso rápido na tela
+        function showToast(message) {
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Função para copiar texto para o clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`Número ${text} copiado!`);
+            }).catch(err => {
+                // Fallback para navegadores mais antigos
+                const tempInput = document.createElement('input');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast(`Número ${text} copiado!`);
+            });
+        }
+
+        // Gera o próximo número em ordem crescente
+        function generateNextNumber() {
+            if (currentCount >= maxLimit) {
+                showToast('Limite máximo de 200.000 atingido!');
+                return;
+            }
+
+            // Remove a classe de vencedor se estiver ativa para focar no novo número
+            displayPanel.classList.remove('winner-active');
+
+            currentCount++;
+            const formatted = formatNumber(currentCount);
+            generatedNumbers.push(formatted);
+
+            // Atualiza o painel
+            panelTitle.innerText = "Último Número Gerado";
+            panelValue.innerText = formatted;
+
+            // Atualiza contador
+            counterBadge.innerText = `${currentCount} Gerados`;
+
+            // Ativa o botão de sortear se houver participantes
+            if (currentCount > 0) {
+                btnDraw.disabled = false;
+            }
+
+            // Adiciona o número no topo da lista visual
+            const itemHTML = `
+                <div class="number-item" id="item-${formatted}">
+                    <span class="number-val">${formatted}</span>
+                    <button class="copy-btn" onclick="copyToClipboard('${formatted}')">
+                        <i class="fa-regular fa-copy"></i> Copiar
+                    </button>
+                </div>
+            `;
+            numbersList.insertAdjacentHTML('afterbegin', itemHTML);
+        }
+
+        // Realiza o Sorteio entre os números gerados na memória
+        function drawWinner() {
+            if (generatedNumbers.length === 0) return;
+
+            panelTitle.innerText = "Sorteando...";
+            panelValue.innerText = "⏳";
+            btnDraw.disabled = true;
+            btnGenerate.disabled = true;
+
+            let counter = 0;
+            // Efeito visual de rotação rápida antes de parar no ganhador
+            const interval = setInterval(() => {
+                const tempIndex = Math.floor(Math.random() * generatedNumbers.length);
+                panelValue.innerText = generatedNumbers[tempIndex];
+                counter++;
+
+                if (counter > 15) {
+                    clearInterval(interval);
+                    
+                    // Seleciona o vencedor real
+                    const winnerIndex = Math.floor(Math.random() * generatedNumbers.length);
+                    const winner = generatedNumbers[winnerIndex];
+
+                    panelTitle.innerText = "🏆 GANHADOR! 🏆";
+                    panelValue.innerText = winner;
+                    displayPanel.classList.add('winner-active');
+
+                    btnDraw.disabled = false;
+                    btnGenerate.disabled = false;
+
+                    showToast(`Sorteado: ${winner}!`);
+                }
+            }, 80);
+        }
+
+        // Reseta todo o estado para recomeçar o processo
+        function resetApp() {
+            if (confirm("Tem certeza que deseja resetar? Isso apagará todos os números atuais.")) {
+                currentCount = 0;
+                generatedNumbers.length = 0;
+                
+                panelTitle.innerText = "Último Número Gerado";
+                panelValue.innerText = "------";
+                displayPanel.classList.remove('winner-active');
+                
+                counterBadge.innerText = "0 Gerados";
+                numbersList.innerHTML = "";
+                btnDraw.disabled = true;
+                btnGenerate.disabled = false;
+                
+                showToast("Sorteio reiniciado!");
+            }
+        }
+    </script>
+</body>
+</html>
