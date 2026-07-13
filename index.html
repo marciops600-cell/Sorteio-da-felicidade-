@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorteio da Felicidade</title>
-    <!-- Google Fonts para um visual moderno -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome para ícones elegantes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -70,7 +68,6 @@
             font-size: 0.9rem;
         }
 
-        /* Área de Destaque */
         .display-panel {
             background: #f8f9fa;
             border-radius: 16px;
@@ -106,7 +103,6 @@
             color: #00b894;
         }
 
-        /* Botões de Controle */
         .actions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -172,7 +168,6 @@
             box-shadow: none !important;
         }
 
-        /* Lista de Cadastrados */
         .list-section {
             margin-top: 25px;
         }
@@ -216,23 +211,22 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .number-item:last-child {
-            margin-bottom: 0;
+        .item-actions {
+            display: flex;
+            gap: 8px;
         }
 
-        .number-val {
+        .copy-btn, .ticket-btn {
+            background: transparent;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
         }
 
         .copy-btn {
-            background: transparent;
             color: var(--primary);
-            padding: 6px 12px;
-            font-size: 0.85rem;
             border: 1px solid var(--primary);
-            border-radius: 6px;
         }
 
         .copy-btn:hover {
@@ -240,7 +234,50 @@
             color: white;
         }
 
-        /* Toast de notificação */
+        .ticket-btn {
+            color: #d35400;
+            border: 1px solid #e67e22;
+            background: #fff5e6;
+        }
+
+        .ticket-btn:hover {
+            background: #e67e22;
+            color: white;
+        }
+
+        /* Modal do Ticket Tradicional */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .ticket-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 85%;
+            max-width: 340px;
+            border: 5px solid var(--primary);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .ticket-msg {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin: 15px 0 5px 0;
+            line-height: 1.4;
+        }
+
         .toast {
             position: fixed;
             bottom: 20px;
@@ -261,28 +298,15 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Animações */
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 206, 201, 0.4); }
             70% { box-shadow: 0 0 0 12px rgba(0, 206, 201, 0); }
             100% { box-shadow: 0 0 0 0 rgba(0, 206, 201, 0); }
         }
 
-        /* Custom Scrollbar */
-        .numbers-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .numbers-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .numbers-list::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 10px;
-        }
-        .numbers-list::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
+        .numbers-list::-webkit-scrollbar { width: 6px; }
+        .numbers-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .numbers-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -293,13 +317,11 @@
             <p class="subtitle">Gere os números sequencialmente e faça seu sorteio</p>
         </header>
 
-        <!-- Painel Central de Informações -->
         <div class="display-panel" id="displayPanel">
             <div class="display-title" id="panelTitle">Último Número Gerado</div>
             <div class="display-number" id="panelValue">------</div>
         </div>
 
-        <!-- Botões Principais -->
         <div class="actions-grid">
             <button class="btn-generate" id="btnGenerate" onclick="generateNextNumber()">
                 <i class="fa-solid fa-plus"></i> Gerar Próximo Número
@@ -312,25 +334,33 @@
             </button>
         </div>
 
-        <!-- Lista de Participantes Ativos -->
         <div class="list-section">
             <div class="section-header">
                 <span>Participantes no Sorteio</span>
                 <span class="counter-badge" id="counterBadge">0 Gerados</span>
             </div>
-            <div class="numbers-list" id="numbersList">
-                <!-- Números adicionados dinamicamente via JS -->
-            </div>
+            <div class="numbers-list" id="numbersList"></div>
         </div>
     </div>
 
-    <!-- Toast de Notificação -->
+    <div class="modal" id="ticketModal" onclick="this.style.display='none'">
+        <div class="ticket-card" onclick="event.stopPropagation()">
+            <h3 style="color: var(--primary); letter-spacing: 1px;">SORTEIO DA FELICIDADE</h3>
+            <p class="ticket-msg">🎉 Parabéns! Você está participando do Sorteio da Felicidade</p>
+            <div style="margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);">
+                <span style="font-size: 0.8rem; color: #636e72; font-weight: 600;">SEU NÚMERO DA SORTE</span>
+                <h1 id="ticketNumber" style="font-size: 3rem; color: var(--primary); margin-top: 5px;">000000</h1>
+            </div>
+            <p style="font-size: 0.75rem; color: #b2bec3; margin-bottom: 15px;">Guarde este número para conferir o resultado.</p>
+            <button style="background: var(--accent); color: white; width: 100%; padding: 10px; border-radius: 8px;" onclick="document.getElementById('ticketModal').style.display='none'">Fechar Ticket</button>
+        </div>
+    </div>
+
     <div class="toast" id="toast">Copiado com sucesso!</div>
 
     <script>
-        let currentCount = 0;
-        const maxLimit = 200000;
-        const generatedNumbers = [];
+        // Carrega dados persistidos do LocalStorage
+        let data = JSON.parse(localStorage.getItem('sorteioFelicidadeData')) || { generated: [], count: 0 };
 
         const panelTitle = document.getElementById('panelTitle');
         const panelValue = document.getElementById('panelValue');
@@ -341,26 +371,22 @@
         const numbersList = document.getElementById('numbersList');
         const toast = document.getElementById('toast');
 
-        // Formata o número com 6 dígitos (ex: 000001) para manter o layout limpo até 200k
+        // Formatação dinâmica sem limite fixo
         function formatNumber(num) {
-            return String(num).padStart(6, '0');
+            const length = Math.max(6, String(num).length);
+            return String(num).padStart(length, '0');
         }
 
-        // Mostra o aviso rápido na tela
         function showToast(message) {
             toast.innerText = message;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
+            setTimeout(() => { toast.classList.remove('show'); }, 2000);
         }
 
-        // Função para copiar texto para o clipboard
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
                 showToast(`Número ${text} copiado!`);
-            }).catch(err => {
-                // Fallback para navegadores mais antigos
+            }).catch(() => {
                 const tempInput = document.createElement('input');
                 tempInput.value = text;
                 document.body.appendChild(tempInput);
@@ -371,47 +397,59 @@
             });
         }
 
-        // Gera o próximo número em ordem crescente
-        function generateNextNumber() {
-            if (currentCount >= maxLimit) {
-                showToast('Limite máximo de 200.000 atingido!');
-                return;
-            }
-
-            // Remove a classe de vencedor se estiver ativa para focar no novo número
-            displayPanel.classList.remove('winner-active');
-
-            currentCount++;
-            const formatted = formatNumber(currentCount);
-            generatedNumbers.push(formatted);
-
-            // Atualiza o painel
-            panelTitle.innerText = "Último Número Gerado";
-            panelValue.innerText = formatted;
-
-            // Atualiza contador
-            counterBadge.innerText = `${currentCount} Gerados`;
-
-            // Ativa o botão de sortear se houver participantes
-            if (currentCount > 0) {
-                btnDraw.disabled = false;
-            }
-
-            // Adiciona o número no topo da lista visual
-            const itemHTML = `
-                <div class="number-item" id="item-${formatted}">
-                    <span class="number-val">${formatted}</span>
-                    <button class="copy-btn" onclick="copyToClipboard('${formatted}')">
-                        <i class="fa-regular fa-copy"></i> Copiar
-                    </button>
-                </div>
-            `;
-            numbersList.insertAdjacentHTML('afterbegin', itemHTML);
+        function openTicket(num) {
+            document.getElementById('ticketNumber').innerText = num;
+            document.getElementById('ticketModal').style.display = 'flex';
         }
 
-        // Realiza o Sorteio entre os números gerados na memória
+        // Renderiza e atualiza os dados da tela respeitando o que está gravado na memória
+        function updateUI() {
+            numbersList.innerHTML = '';
+            
+            // Renderiza na ordem reversa (mais recente no topo) como no vídeo
+            data.generated.slice().reverse().forEach(num => {
+                const itemHTML = `
+                    <div class="number-item">
+                        <span style="font-weight:600; letter-spacing:1px;">${num}</span>
+                        <div class="item-actions">
+                            <button class="ticket-btn" onclick="openTicket('${num}')">
+                                <i class="fa-solid fa-ticket"></i> Ticket
+                            </button>
+                            <button class="copy-btn" onclick="copyToClipboard('${num}')">
+                                <i class="fa-regular fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                numbersList.insertAdjacentHTML('beforeend', itemHTML);
+            });
+
+            counterBadge.innerText = `${data.generated.length} Gerados`;
+            
+            if (data.generated.length > 0) {
+                btnDraw.disabled = false;
+                panelValue.innerText = data.generated[data.generated.length - 1];
+            } else {
+                btnDraw.disabled = true;
+                panelValue.innerText = "------";
+            }
+        }
+
+        function generateNextNumber() {
+            displayPanel.classList.remove('winner-active');
+            panelTitle.innerText = "Último Número Gerado";
+
+            data.count++;
+            const formatted = formatNumber(data.count);
+            data.generated.push(formatted);
+
+            // Grava no LocalStorage
+            localStorage.setItem('sorteioFelicidadeData', JSON.stringify(data));
+            updateUI();
+        }
+
         function drawWinner() {
-            if (generatedNumbers.length === 0) return;
+            if (data.generated.length === 0) return;
 
             panelTitle.innerText = "Sorteando...";
             panelValue.innerText = "⏳";
@@ -419,18 +457,16 @@
             btnGenerate.disabled = true;
 
             let counter = 0;
-            // Efeito visual de rotação rápida antes de parar no ganhador
             const interval = setInterval(() => {
-                const tempIndex = Math.floor(Math.random() * generatedNumbers.length);
-                panelValue.innerText = generatedNumbers[tempIndex];
+                const tempIndex = Math.floor(Math.random() * data.generated.length);
+                panelValue.innerText = data.generated[tempIndex];
                 counter++;
 
                 if (counter > 15) {
                     clearInterval(interval);
                     
-                    // Seleciona o vencedor real
-                    const winnerIndex = Math.floor(Math.random() * generatedNumbers.length);
-                    const winner = generatedNumbers[winnerIndex];
+                    const winnerIndex = Math.floor(Math.random() * data.generated.length);
+                    const winner = data.generated[winnerIndex];
 
                     panelTitle.innerText = "🏆 GANHADOR! 🏆";
                     panelValue.innerText = winner;
@@ -438,30 +474,23 @@
 
                     btnDraw.disabled = false;
                     btnGenerate.disabled = false;
-
-                    showToast(`Sorteado: ${winner}!`);
                 }
             }, 80);
         }
 
-        // Reseta todo o estado para recomeçar o processo
         function resetApp() {
-            if (confirm("Tem certeza que deseja resetar? Isso apagará todos os números atuais.")) {
-                currentCount = 0;
-                generatedNumbers.length = 0;
-                
-                panelTitle.innerText = "Último Número Gerado";
-                panelValue.innerText = "------";
+            if (confirm("Tem certeza que deseja resetar? Isso apagará todos os números salvos na memória.")) {
+                data = { generated: [], count: 0 };
+                localStorage.removeItem('sorteioFelicidadeData');
                 displayPanel.classList.remove('winner-active');
-                
-                counterBadge.innerText = "0 Gerados";
-                numbersList.innerHTML = "";
-                btnDraw.disabled = true;
-                btnGenerate.disabled = false;
-                
+                panelTitle.innerText = "Último Número Gerado";
+                updateUI();
                 showToast("Sorteio reiniciado!");
             }
         }
+
+        // Inicializa o app trazendo as informações salvas do passado
+        updateUI();
     </script>
 </body>
 </html>
